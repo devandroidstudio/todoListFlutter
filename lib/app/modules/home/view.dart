@@ -38,8 +38,6 @@ class HomePage extends GetView<HomeController> {
                           data: element,
                           onDragStarted: () => controller.changeDeleting(true),
                           onDraggableCanceled: (velocity, offset) {
-                            print(velocity);
-                            print(offset);
                             controller.changeDeleting(false);
                           },
                           onDragEnd: (details) {
@@ -59,8 +57,13 @@ class HomePage extends GetView<HomeController> {
       floatingActionButton: DragTarget<Task>(
         builder: (_, candidateData, rejectedData) {
           return Obx(() => FloatingActionButton(
-              onPressed: () =>
-                  Get.to(() => AddDialog(), transition: Transition.downToUp),
+              onPressed: () {
+                if (controller.tasks.isNotEmpty) {
+                  Get.to(() => AddDialog(), transition: Transition.downToUp);
+                } else {
+                  EasyLoading.showInfo('Please create your task type');
+                }
+              },
               backgroundColor: controller.deleting.value ? Colors.red : blue,
               child:
                   Icon(controller.deleting.value ? Icons.delete : Icons.add)));
