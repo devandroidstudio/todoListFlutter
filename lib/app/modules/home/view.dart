@@ -8,6 +8,7 @@ import 'package:todolistappp/app/core/utils/extenstions.dart';
 import 'package:todolistappp/app/modules/home/widgets/add_card.dart';
 import 'package:todolistappp/app/modules/home/widgets/add_dialog.dart';
 import 'package:todolistappp/app/modules/home/widgets/task_card.dart';
+import 'package:todolistappp/app/modules/report/view.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -15,45 +16,56 @@ class HomePage extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-          child: ListView(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(4.0.wp),
-            child: Text(
-              'List Task',
-              style: TextStyle(fontSize: 24.0.sp, fontWeight: FontWeight.bold),
-            ),
-          ),
-          Obx(
-            () => GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const ClampingScrollPhysics(),
+      body: Obx(
+        () => IndexedStack(
+          index: controller.tabIndex.value,
+          children: [
+            SafeArea(
+                child: ListView(
               children: [
-                AddCard(),
-                ...controller.tasks
-                    .map(
-                      (element) => LongPressDraggable(
-                          data: element,
-                          onDragStarted: () => controller.changeDeleting(true),
-                          onDraggableCanceled: (velocity, offset) {
-                            controller.changeDeleting(false);
-                          },
-                          onDragEnd: (details) {
-                            print("hello");
-                            controller.changeDeleting(false);
-                          },
-                          feedback: Opacity(
-                              opacity: 0.8, child: TaskCard(task: element)),
-                          child: TaskCard(task: element)),
-                    )
-                    .toList(),
+                Padding(
+                  padding: EdgeInsets.all(4.0.wp),
+                  child: Text(
+                    'List Task',
+                    style: TextStyle(
+                        fontSize: 24.0.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Obx(
+                  () => GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const ClampingScrollPhysics(),
+                    children: [
+                      AddCard(),
+                      ...controller.tasks
+                          .map(
+                            (element) => LongPressDraggable(
+                                data: element,
+                                onDragStarted: () =>
+                                    controller.changeDeleting(true),
+                                onDraggableCanceled: (velocity, offset) {
+                                  controller.changeDeleting(false);
+                                },
+                                onDragEnd: (details) {
+                                  print("hello");
+                                  controller.changeDeleting(false);
+                                },
+                                feedback: Opacity(
+                                    opacity: 0.8,
+                                    child: TaskCard(task: element)),
+                                child: TaskCard(task: element)),
+                          )
+                          .toList(),
+                    ],
+                  ),
+                )
               ],
-            ),
-          )
-        ],
-      )),
+            )),
+            ReportPage()
+          ],
+        ),
+      ),
       floatingActionButton: DragTarget<Task>(
         builder: (_, candidateData, rejectedData) {
           return Obx(() => FloatingActionButton(
@@ -72,6 +84,34 @@ class HomePage extends GetView<HomeController> {
           controller.deleteTask(task);
           EasyLoading.showSuccess('Delete Sucess');
         },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: Theme(
+        data: ThemeData(
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent),
+        child: Obx(
+          () => BottomNavigationBar(
+            onTap: (value) => controller.changeTabIndex(value),
+            currentIndex: controller.tabIndex.value,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            items: [
+              BottomNavigationBarItem(
+                  label: 'Duyen',
+                  icon: Padding(
+                    padding: EdgeInsets.only(right: 15.0.wp),
+                    child: Icon(Icons.apps),
+                  )),
+              BottomNavigationBarItem(
+                  label: 'Heo',
+                  icon: Padding(
+                    padding: EdgeInsets.only(left: 15.0.wp),
+                    child: Icon(Icons.data_usage),
+                  ))
+            ],
+          ),
+        ),
       ),
     );
   }
